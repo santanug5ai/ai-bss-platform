@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>AI-Enabled BSS Platform</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.5.0/dist/Recharts.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0F172A;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .background-animation {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .blob {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.1;
+            animation: blob 7s infinite;
+        }
+
+        .blob-1 {
+            top: -50px;
+            left: -50px;
+            background: #8B5CF6;
+        }
+
+        .blob-2 {
+            top: -50px;
+            right: -50px;
+            background: #06B6D4;
+            animation-delay: 2s;
+        }
+
+        .blob-3 {
+            bottom: -100px;
+            left: 100px;
+            background: #EC4899;
+            animation-delay: 4s;
+        }
+
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%);
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header-icon {
+            background: linear-gradient(135deg, #8B5CF6, #06B6D4);
+            padding: 0.75rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .header-title {
+            font-size: clamp(1.25rem, 4vw, 2rem);
+            font-weight: 700;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .header-subtitle {
+            font-size: clamp(0.75rem, 2vw, 0.875rem);
+            opacity: 0.9;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            position: sticky;
+            top: 0;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tabs {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0;
+            min-width: min-content;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab:hover {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .tab.active {
+            color: #fff;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8B5CF6, #06B6D4);
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            z-index: 1;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 2rem;
+            }
+        }
+
+        /* Use Case Cards */
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .use-case-grid {
+                grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            }
+        }
+
+        .use-case-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .use-case-card:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(139, 92, 246, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2);
+        }
+
+        .use-case-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .use-case-description {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1rem;
+        }
+
+        .view-button {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #8B5CF6, #06B6D4);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .view-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        @media (min-width: 640px) {
+            .modal-overlay {
+                padding: 1rem;
+            }
+        }
+
+        .modal-content {
+            background: #0F172A;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        @media (min-width: 640px) {
+            .modal-content {
+                width: 95vw;
+                height: 95vh;
+                max-width: 1400px;
+                border-radius: 24px;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #8B5CF6, #06B6D4);
+            padding: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .modal-header {
+                padding: 1.5rem 2rem;
+            }
+        }
+
+        .modal-header-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .modal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-title {
+            font-size: clamp(1.125rem, 3vw, 1.75rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .modal-description {
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (min-width: 768px) {
+            .modal-body {
+                padding: 2rem;
+            }
+        }
+
+        .section {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .section {
+                padding: 1.5rem;
+            }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-icon {
+            padding: 0.75rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            font-weight: 700;
+        }
+
+        .section-content {
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .section-ai {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.5), rgba(49, 46, 129, 0.5));
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .section-value {
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.5), rgba(6, 95, 70, 0.5));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .section-contact {
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.5), rgba(131, 24, 67, 0.5));
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .contact-label {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+        }
+
+        .contact-email {
+            font-size: 0.875rem;
+            color: #A78BFA;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            word-break: break-all;
+        }
+
+        .contact-email:hover {
+            color: #C4B5FD;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .chart-container {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.25rem;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                padding: 1.5rem;
+            }
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-line {
+            width: 40px;
+            height: 3px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .chart-title {
+            font-size: clamp(0.9375rem, 2vw, 1.125rem);
+            font-weight: 700;
+            flex: 1;
+        }
+
+        .chart-wrapper {
+            width: 100%;
+            height: 250px;
+        }
+
+        @media (min-width: 640px) {
+            .chart-wrapper {
+                height: 300px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .chart-wrapper {
+                height: 280px;
+            }
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        @media (min-width: 640px) {
+            .legend-item {
+                font-size: 0.8125rem;
+            }
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            max-width: 1400px;
+            margin: 2rem auto 0;
+            padding: 2rem 1rem;
+            z-index: 1;
+        }
+
+        .footer-content {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Utility Classes */
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .icon {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+
+        // SVG Icons as components
+        const SparklesIcon = () => (
+            <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+        );
+
+        const TargetIcon = () => (
+            <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+
+        const TrendingUpIcon = () => (
+            <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+        );
+
+        const MailIcon = () => (
+            <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+        );
+
+        const CloseIcon = () => (
+            <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        );
+
+        const ArrowRightIcon = () => (
+            <svg className="icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+        );
+
+        // Use Cases Data
+        const useCasesData = {
+            marketing: [
+                {
+                    id: 1,
+                    title: "Predictive Lead Scoring",
+                    description: "AI-powered system to score and prioritize leads based on conversion probability",
+                    aiCapabilities: "Machine Learning algorithms analyze customer behavior, demographics, and engagement patterns to predict lead quality and conversion likelihood",
+                    expectedValue: "40% increase in conversion rates, 30% reduction in sales cycle time, improved ROI on marketing spend by targeting high-value prospects"
+                },
+                {
+                    id: 2,
+                    title: "Personalized Campaign Optimization",
+                    description: "Dynamic campaign personalization based on customer preferences and behavior",
+                    aiCapabilities: "Natural Language Processing and recommendation engines create personalized content, offers, and timing for each customer segment",
+                    expectedValue: "50% improvement in campaign engagement, 35% increase in click-through rates, 25% boost in customer acquisition"
+                },
+                {
+                    id: 3,
+                    title: "Churn Prediction & Prevention",
+                    description: "Identify customers at risk of churning and trigger retention campaigns",
+                    aiCapabilities: "Predictive analytics using historical data, usage patterns, and behavioral signals to forecast churn probability with 85% accuracy",
+                    expectedValue: "20% reduction in customer churn, $2M+ annual revenue retention, improved customer lifetime value by 30%"
+                },
+                {
+                    id: 4,
+                    title: "Smart Content Generation",
+                    description: "AI-assisted marketing content creation and optimization",
+                    aiCapabilities: "Generative AI creates marketing copy, email templates, and social media content tailored to brand voice and audience preferences",
+                    expectedValue: "70% faster content creation, 45% improvement in engagement metrics, consistent brand messaging across channels"
+                },
+                {
+                    id: 5,
+                    title: "Market Segmentation Intelligence",
+                    description: "Advanced customer segmentation using AI clustering algorithms",
+                    aiCapabilities: "Unsupervised learning identifies hidden customer segments based on multi-dimensional behavioral and demographic data",
+                    expectedValue: "Discover 5-7 new profitable segments, 40% more targeted campaigns, 28% increase in segment-specific conversion rates"
+                }
+            ],
+            customer: [
+                {
+                    id: 6,
+                    title: "AI Chatbot Support",
+                    description: "24/7 intelligent virtual assistant for customer inquiries and support",
+                    aiCapabilities: "Natural Language Understanding with context awareness, sentiment analysis, and automated issue resolution for 80% of common queries",
+                    expectedValue: "60% reduction in support costs, 90% faster response times, 85% customer satisfaction score, handle 10x more inquiries"
+                },
+                {
+                    id: 7,
+                    title: "Customer Sentiment Analysis",
+                    description: "Real-time analysis of customer feedback and sentiment across all channels",
+                    aiCapabilities: "Deep learning models process text, voice, and interaction data to identify emotions, satisfaction levels, and potential issues",
+                    expectedValue: "Early detection of 95% of potential issues, 40% improvement in NPS scores, proactive problem resolution"
+                },
+                {
+                    id: 8,
+                    title: "Intelligent Ticket Routing",
+                    description: "Automatic categorization and routing of support tickets to appropriate teams",
+                    aiCapabilities: "Multi-class classification algorithms analyze ticket content, urgency, and expertise required for optimal agent assignment",
+                    expectedValue: "50% faster ticket resolution, 35% improvement in first-contact resolution, better agent utilization"
+                },
+                {
+                    id: 9,
+                    title: "Proactive Customer Outreach",
+                    description: "Predict customer needs and initiate timely engagement",
+                    aiCapabilities: "Predictive models identify optimal moments for upsell, cross-sell, or support based on customer journey analysis",
+                    expectedValue: "30% increase in upsell revenue, 45% higher customer engagement, improved retention by 25%"
+                },
+                {
+                    id: 10,
+                    title: "Customer Journey Optimization",
+                    description: "Map and optimize customer touchpoints across the entire lifecycle",
+                    aiCapabilities: "Process mining and path analysis identify friction points and opportunities for improvement in customer journeys",
+                    expectedValue: "25% reduction in customer effort score, 40% faster onboarding, 35% increase in product adoption"
+                }
+            ],
+            product: [
+                {
+                    id: 11,
+                    title: "Smart Product Recommendations",
+                    description: "AI-driven personalized product suggestions based on customer behavior",
+                    aiCapabilities: "Collaborative filtering and deep learning analyze purchase history, browsing patterns, and similar customer behaviors",
+                    expectedValue: "45% increase in cross-sell revenue, 50% improvement in recommendation click-through, 30% higher average order value"
+                },
+                {
+                    id: 12,
+                    title: "Dynamic Pricing Optimization",
+                    description: "Real-time price optimization based on demand, competition, and market conditions",
+                    aiCapabilities: "Reinforcement learning models continuously adjust pricing strategies considering elasticity, inventory, and competitive landscape",
+                    expectedValue: "15-20% revenue increase, optimized margins, improved inventory turnover by 35%, competitive positioning"
+                },
+                {
+                    id: 13,
+                    title: "Product Demand Forecasting",
+                    description: "Accurate prediction of product demand for inventory and supply chain optimization",
+                    aiCapabilities: "Time series analysis with external factors (seasonality, trends, events) to forecast demand with 92% accuracy",
+                    expectedValue: "40% reduction in stockouts, 30% lower inventory holding costs, $5M+ annual savings in supply chain"
+                },
+                {
+                    id: 14,
+                    title: "New Product Development Intelligence",
+                    description: "AI-powered insights for product innovation and feature prioritization",
+                    aiCapabilities: "Analyze market trends, customer feedback, and competitive intelligence to identify product gaps and opportunities",
+                    expectedValue: "50% faster time-to-market, 3x higher success rate for new products, data-driven innovation roadmap"
+                },
+                {
+                    id: 15,
+                    title: "Product Quality Analytics",
+                    description: "Predictive quality assurance and defect detection",
+                    aiCapabilities: "Computer vision and anomaly detection identify potential quality issues before products reach customers",
+                    expectedValue: "60% reduction in defects, 40% lower warranty costs, improved brand reputation and customer satisfaction"
+                }
+            ],
+            revenue: [
+                {
+                    id: 16,
+                    title: "Revenue Leakage Detection",
+                    description: "Identify and prevent revenue loss from billing errors and fraud",
+                    aiCapabilities: "Anomaly detection algorithms monitor transactions in real-time to flag unusual patterns, billing errors, and potential fraud",
+                    expectedValue: "Recover 5-8% of revenue previously lost, prevent $10M+ annual leakage, 90% fraud detection accuracy"
+                },
+                {
+                    id: 17,
+                    title: "Smart Billing Optimization",
+                    description: "Automated billing accuracy and dispute resolution",
+                    aiCapabilities: "Machine learning validates billing data, identifies discrepancies, and automates correction processes",
+                    expectedValue: "75% reduction in billing disputes, 50% faster dispute resolution, improved cash flow by 20%"
+                },
+                {
+                    id: 18,
+                    title: "Revenue Forecasting & Planning",
+                    description: "Accurate revenue predictions for strategic planning and investor relations",
+                    aiCapabilities: "Ensemble models combine multiple data sources (sales pipeline, market trends, seasonality) for precise forecasting",
+                    expectedValue: "95% forecast accuracy, better resource allocation, improved investor confidence, proactive planning"
+                },
+                {
+                    id: 19,
+                    title: "Payment Default Prediction",
+                    description: "Early identification of payment risks and collection optimization",
+                    aiCapabilities: "Credit risk models analyze payment history, customer behavior, and external factors to predict default probability",
+                    expectedValue: "30% reduction in bad debt, 40% improvement in collections efficiency, optimized credit policies"
+                },
+                {
+                    id: 20,
+                    title: "Revenue Assurance Automation",
+                    description: "Continuous monitoring and validation of revenue streams",
+                    aiCapabilities: "AI-powered reconciliation engines automatically verify revenue integrity across systems and identify discrepancies",
+                    expectedValue: "99.9% revenue accuracy, 80% reduction in manual audits, real-time visibility into revenue health"
+                }
+            ]
+        };
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('marketing');
+            const [selectedUseCase, setSelectedUseCase] = useState(null);
+
+            const tabs = [
+                { id: 'marketing', label: 'Marketing & Sales' },
+                { id: 'customer', label: 'Customer Management' },
+                { id: 'product', label: 'Product Management' },
+                { id: 'revenue', label: 'Revenue Management' }
+            ];
+
+            const currentUseCases = useCasesData[activeTab];
+
+            useEffect(() => {
+                if (selectedUseCase) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'auto';
+                }
+            }, [selectedUseCase]);
+
+            return (
+                <>
+                    <div className="background-animation">
+                        <div className="blob blob-1"></div>
+                        <div className="blob blob-2"></div>
+                        <div className="blob blob-3"></div>
+                    </div>
+
+                    <header className="header">
+                        <div className="header-content">
+                            <div className="header-icon">
+                                <SparklesIcon />
+                            </div>
+                            <h1 className="header-title">AI-Enabled BSS Platform</h1>
+                            <p className="header-subtitle">Next-Generation Business Support Systems Powered by Artificial Intelligence</p>
+                        </div>
+                    </header>
+
+                    <div className="tabs-container">
+                        <div className="tabs">
+                            {tabs.map(tab => (
+                                <button
+                                    key={tab.id}
+                                    className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(tab.id)}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <main className="main-content">
+                        <div className="use-case-grid">
+                            {currentUseCases.map(useCase => (
+                                <div key={useCase.id} className="use-case-card">
+                                    <h3 className="use-case-title">{useCase.title}</h3>
+                                    <p className="use-case-description">{useCase.description}</p>
+                                    <button 
+                                        className="view-button"
+                                        onClick={() => setSelectedUseCase(useCase)}
+                                    >
+                                        <span>View Details</span>
+                                        <ArrowRightIcon />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </main>
+
+                    <footer className="footer">
+                        <div className="footer-content">
+                            <p className="footer-text">
+                                © 2025 AI-Enabled BSS Platform. Transforming Business Operations with Artificial Intelligence.
+                            </p>
+                        </div>
+                    </footer>
+
+                    {selectedUseCase && (
+                        <UseCaseModal 
+                            useCase={selectedUseCase}
+                            onClose={() => setSelectedUseCase(null)}
+                        />
+                    )}
+                </>
+            );
+        }
+
+        function UseCaseModal({ useCase, onClose }) {
+            const generateChartData = () => {
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+                return months.map((month, index) => ({
+                    month,
+                    performance: Math.floor(60 + Math.random() * 40 + (index * 1.5)),
+                    baseline: Math.floor(50 + Math.random() * 15),
+                    target: 85 + index
+                }));
+            };
+
+            const generateBarData = () => {
+                const categories = ['Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4'];
+                return categories.map((quarter, index) => ({
+                    quarter,
+                    current: Math.floor(100000 + Math.random() * 200000 + (index * 10000)),
+                    previous: Math.floor(80000 + Math.random() * 150000)
+                }));
+            };
+
+            const chartData = generateChartData();
+            const barData = generateBarData();
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <div className="modal-header-content">
+                                <div className="modal-badge">
+                                    <TargetIcon />
+                                    <span>Use Case Details</span>
+                                </div>
+                                <h2 className="modal-title">{useCase.title}</h2>
+                                <p className="modal-description">{useCase.description}</p>
+                            </div>
+                            <button className="modal-close" onClick={onClose}>
+                                <CloseIcon />
+                            </button>
+                        </div>
+
+                        <div className="modal-body">
+                            <div className="section section-ai">
+                                <div className="section-header">
+                                    <div className="section-icon" style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+                                        <SparklesIcon />
+                                    </div>
+                                    <h3 className="section-title">AI Capabilities</h3>
+                                </div>
+                                <p className="section-content">{useCase.aiCapabilities}</p>
+                            </div>
+
+                            <div className="section section-value">
+                                <div className="section-header">
+                                    <div className="section-icon" style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
+                                        <TrendingUpIcon />
+                                    </div>
+                                    <h3 className="section-title">Expected Business Value</h3>
+                                </div>
+                                <p className="section-content">{useCase.expectedValue}</p>
+                            </div>
+
+                            <div className="charts-grid">
+                                <div className="chart-container">
+                                    <div className="chart-header">
+                                        <div className="chart-line" style={{ background: 'linear-gradient(90deg, #8B5CF6, #06B6D4)' }}></div>
+                                        <h4 className="chart-title">Performance Metrics</h4>
+                                    </div>
+                                    <div className="chart-wrapper">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <LineChart data={chartData}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                                <XAxis 
+                                                    dataKey="month" 
+                                                    stroke="rgba(255,255,255,0.6)"
+                                                    style={{ fontSize: '11px' }}
+                                                />
+                                                <YAxis 
+                                                    stroke="rgba(255,255,255,0.6)"
+                                                    style={{ fontSize: '11px' }}
+                                                />
+                                                <Tooltip 
+                                                    contentStyle={{ 
+                                                        background: '#1E293B', 
+                                                        border: '1px solid rgba(255,255,255,0.2)',
+                                                        borderRadius: '8px',
+                                                        fontSize: '12px'
+                                                    }}
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="performance" 
+                                                    stroke="#8B5CF6" 
+                                                    strokeWidth={3}
+                                                    dot={false}
+                                                    name="AI Performance"
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="baseline" 
+                                                    stroke="#64748B" 
+                                                    strokeWidth={2}
+                                                    strokeDasharray="5 5"
+                                                    dot={false}
+                                                    name="Baseline"
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="target" 
+                                                    stroke="#10B981" 
+                                                    strokeWidth={2}
+                                                    strokeDasharray="8 4"
+                                                    dot={false}
+                                                    name="Target"
+                                                />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                    <div className="legend">
+                                        <div className="legend-item">
+                                            <div className="legend-color" style={{ background: '#8B5CF6' }}></div>
+                                            <span>AI Performance</span>
+                                        </div>
+                                        <div className="legend-item">
+                                            <div className="legend-color" style={{ background: '#64748B' }}></div>
+                                            <span>Baseline</span>
+                                        </div>
+                                        <div className="legend-item">
+                                            <div className="legend-color" style={{ background: '#10B981' }}></div>
+                                            <span>Target</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="chart-container">
+                                    <div className="chart-header">
+                                        <div className="chart-line" style={{ background: 'linear-gradient(90deg, #F59E0B, #EC4899)' }}></div>
+                                        <h4 className="chart-title">Value Impact (USD)</h4>
+                                    </div>
+                                    <div className="chart-wrapper">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={barData}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                                <XAxis 
+                                                    dataKey="quarter" 
+                                                    stroke="rgba(255,255,255,0.6)"
+                                                    style={{ fontSize: '11px' }}
+                                                />
+                                                <YAxis 
+                                                    stroke="rgba(255,255,255,0.6)"
+                                                    style={{ fontSize: '11px' }}
+                                                />
+                                                <Tooltip 
+                                                    contentStyle={{ 
+                                                        background: '#1E293B', 
+                                                        border: '1px solid rgba(255,255,255,0.2)',
+                                                        borderRadius: '8px',
+                                                        fontSize: '12px'
+                                                    }}
+                                                    formatter={(value) => `$${value.toLocaleString()}`}
+                                                />
+                                                <Bar 
+                                                    dataKey="current" 
+                                                    fill="#F59E0B"
+                                                    radius={[4, 4, 0, 0]}
+                                                    name="Current Year"
+                                                    maxBarSize={40}
+                                                />
+                                                <Bar 
+                                                    dataKey="previous" 
+                                                    fill="#64748B"
+                                                    radius={[4, 4, 0, 0]}
+                                                    name="Previous Year"
+                                                    maxBarSize={40}
+                                                />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                    <div className="legend">
+                                        <div className="legend-item">
+                                            <div className="legend-color" style={{ background: '#F59E0B' }}></div>
+                                            <span>Current Year</span>
+                                        </div>
+                                        <div className="legend-item">
+                                            <div className="legend-color" style={{ background: '#64748B' }}></div>
+                                            <span>Previous Year</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="section section-contact">
+                                <div className="section-header">
+                                    <div className="section-icon" style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}>
+                                        <MailIcon />
+                                    </div>
+                                    <h3 className="section-title">Get Real-Time Demo</h3>
+                                </div>
+                                <p className="section-content" style={{ marginBottom: '0.75rem' }}>
+                                    Interested in seeing this AI solution in action? Connect with the author for a personalized demonstration and implementation discussion.
+                                </p>
+                                <div className="contact-info">
+                                    <span className="contact-label">Contact:</span>
+                                    <a href="mailto:santanughosh98@gmail.com" className="contact-email">
+                                        <MailIcon />
+                                        <span>santanughosh98@gmail.com</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
